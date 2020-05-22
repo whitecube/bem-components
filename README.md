@@ -1,6 +1,6 @@
 # BEM View Components for Laravel
 
-This package introduces a `BemComponent` class that you can use instead of the regular `Component` class, which gives you a few helper methods to aid you with your bem-style components.
+This package introduces a `BemComponent` class that you can use instead of the regular `Component`, which gives you a few helper methods to aid you with your bem-style workflow.
 
 
 ## Installation
