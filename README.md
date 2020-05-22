@@ -77,7 +77,7 @@ will result in
 
 ## Available methods
 
-### `$bem($base): string`
+#### `$bem($base): string`  
 Get the compiled bem classes with modifiers. The modifiers are specified using the `modifiers` prop on your component, which accepts either a string of space-separated modifiers, or an array.
 
 For example, calling `$bem('btn')` on these:
@@ -99,12 +99,12 @@ Will output `header__btn btn btn--primary btn--error`
 
 ---
 
-### `$hasModifier($modifier): bool`
+#### `$hasModifier($modifier): bool`
 Checks if the specified modifier is applied on this component.
 
 ---
 
-### `$hasClass($class): bool`
+#### `$hasClass($class): bool`
 Checks if the specified class is applied on this component.
 
 ## 💖 Sponsorships
