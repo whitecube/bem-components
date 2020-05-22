@@ -1,0 +1,31 @@
+{
+    "name": "whitecube/bem-components",
+    "description": "BEM view components in Laravel",
+    "license": "MIT",
+    "keywords": [
+        "laravel",
+        "BEM",
+        "view",
+        "components",
+        "view components"
+    ],
+    "authors": [
+        {
+            "name": "Adrien Leloup",
+            "email": "adrien@whitecube.be"
+        }
+    ],
+    "require": {
+        "laravel/framework": "^7.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Whitecube\\BemComponents\\": "src/"
+        }
+    },
+    "config": {
+        "sort-packages": true
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}
