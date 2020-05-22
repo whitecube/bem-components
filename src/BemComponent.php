@@ -32,7 +32,7 @@ abstract class BemComponent extends Component
      */
     public function getClasses()
     {
-        if(!$this->classes) {
+        if(is_null($this->classes)) {
             $this->classes = explode(' ', $this->attributes->get('class'));
         }
 
@@ -46,7 +46,7 @@ abstract class BemComponent extends Component
      */
     protected function getModifiers()
     {
-        if(!$this->modifiers) {
+        if(is_null($this->modifiers)) {
             $modifiers = $this->attributes->get('modifiers');
             $this->modifiers = is_array($modifiers) ? $modifiers : explode(' ', $modifiers);
         }
