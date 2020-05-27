@@ -48,7 +48,7 @@ abstract class BemComponent extends Component
     {
         if(is_null($this->modifiers)) {
             $modifiers = $this->attributes->get('modifiers');
-            $this->modifiers = is_array($modifiers) ? $modifiers : explode(' ', $modifiers);
+            $this->modifiers = is_array($modifiers) ? $modifiers : array_filter(explode(' ', $modifiers));
         }
 
         return $this->modifiers;
