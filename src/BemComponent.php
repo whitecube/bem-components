@@ -22,7 +22,7 @@ abstract class BemComponent extends Component
             return $base . '--' . $modifier;
         }, $this->getModifiers());
 
-        return implode(' ', array_merge([$base], $modifiers, $this->getClasses()));
+        return implode(' ', array_filter(array_merge([$base], $modifiers, $this->getClasses())));
     }
 
     /**
