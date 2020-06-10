@@ -9,6 +9,12 @@ abstract class BemComponent extends Component
     public $modifiers;
     public $classes;
 
+    public function __construct($modifiers = [], $classes = '')
+    {
+        $this->modifiers = $this->processModifiers($modifiers);
+        $this->classes = $this->processClasses($classes);
+    }
+
     /**
      * Generate the base bem class with modifiers
      * and additional classes
@@ -33,10 +39,21 @@ abstract class BemComponent extends Component
     public function getClasses()
     {
         if(is_null($this->classes)) {
-            $this->classes = explode(' ', $this->attributes->get('class'));
+            $this->classes = $this->processClasses($this->attributes->get('class'));
         }
 
         return $this->classes;
+    }
+
+    /**
+     * Process the class string into an array
+     *
+     * @param string $classes
+     * @return array
+     */
+    protected function processClasses($classes)
+    {
+        return explode(' ', $classes);
     }
 
     /**
@@ -48,10 +65,21 @@ abstract class BemComponent extends Component
     {
         if(is_null($this->modifiers)) {
             $modifiers = $this->attributes->get('modifiers');
-            $this->modifiers = is_array($modifiers) ? $modifiers : array_filter(explode(' ', $modifiers));
+            $this->modifiers = $this->processModifiers($modifiers);
         }
 
         return $this->modifiers;
+    }
+
+    /**
+     * Process the given modifiers into an array
+     *
+     * @param $modifiers
+     * @return array
+     */
+    protected function processModifiers($modifiers)
+    {
+        return is_array($modifiers) ? $modifiers : array_filter(explode(' ', $modifiers));
     }
 
     /**
