@@ -63,12 +63,16 @@ abstract class BemComponent extends Component
      */
     protected function getModifiers()
     {
-        if(is_null($this->modifiers)) {
+        if(! is_null($this->attributes)) {
             $modifiers = $this->attributes->get('modifiers');
-            $this->modifiers = $this->processModifiers($modifiers);
+
+            $this->modifiers = array_merge(
+                $this->processModifiers($modifiers),
+                $this->modifiers ?? []
+            );
         }
 
-        return $this->modifiers;
+        return $this->modifiers ?? [];
     }
 
     /**
@@ -102,6 +106,39 @@ abstract class BemComponent extends Component
     public function hasClass($classname)
     {
         return in_array($classname, $this->getClasses());
+    }
+
+    /**
+     * Set a modifier programmatically
+     *
+     * @param string $modifier
+     * @return void
+     */
+    public function modifier(string $modifier)
+    {
+        if (is_null($this->modifiers)) {
+            $this->modifiers = [];
+        }
+
+        $this->modifiers[] = $modifier;
+    }
+
+    /**
+     * Set multiple modifiers programmatically
+     *
+     * @param array $modifiers
+     * @param boolean $overwrite
+     * @return void
+     */
+    public function modifiers(array $modifiers, $overwrite = false)
+    {
+        if ($overwrite) {
+            $this->modifiers = $modifiers;
+
+            return;
+        }
+
+        $this->modifiers = array_merge($this->getModifiers(), $modifiers);
     }
 
 }
