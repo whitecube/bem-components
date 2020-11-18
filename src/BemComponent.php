@@ -140,5 +140,19 @@ abstract class BemComponent extends Component
 
         $this->modifiers = array_merge($this->getModifiers(), $modifiers);
     }
+    
+    
+    /**
+     * Get the view instance
+     *
+     * @return \Illuminate\Contracts\View\View
+     */
+    public function view()
+    {
+        $view = $this->resolveView();
+        $view->with($this->data());
+
+        return $view;
+    }
 
 }
