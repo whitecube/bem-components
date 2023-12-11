@@ -7,16 +7,22 @@ use Illuminate\View\ComponentAttributeBag;
 trait HasBemClasses
 {
     /**
+     * The component's BEM modifiers.
+     */
+    protected array $modifiers = [];
+
+    /**
+     * The component's additional classes.
+     */
+    protected array $classes = [];
+
+    /**
      * Define the component's modifiers.
      */
     public function modifiers(string|array $modifiers): static
     {
-        $this->attributes = $this->attributes ?: $this->newAttributeBag();
-
-        $defined = $this->attributes->get('modifiers', []);
-
-        $this->attributes['modifiers'] = array_merge(
-            is_array($defined) ? $defined : $this->processClassList($defined),
+        $this->modifiers = array_merge(
+            $this->modifiers,
             $this->processClassList($modifiers),
         );
 
@@ -36,16 +42,26 @@ trait HasBemClasses
      */
     public function classes(string|array $classes): static
     {
-        $this->attributes = $this->attributes ?: $this->newAttributeBag();
-
-        $defined = $this->attributes->get('class', []);
-
-        $this->attributes['class'] = array_merge(
-            is_array($defined) ? $defined : $this->processClassList($defined),
+        $this->classes = array_merge(
+            $this->classes,
             $this->processClassList($classes),
         );
 
         return $this;
+    }
+
+    /**
+     * Get and remove eventual existing attributes
+     */
+    protected function pullClassListAttribute(string $key): array
+    {
+        $classList = $this->processClassList(
+            $this->attributes->get($key, [])
+        );
+
+        unset($this->attributes[$key]);
+
+        return $classList;
     }
 
     /**
@@ -72,7 +88,7 @@ trait HasBemClasses
      */
     protected function getModifierClasses(string $base): array
     {
-        return array_map(fn($modifier) => $base.'--'.$modifier, $this->getModifiers());
+        return $this->buildModifierClasses($base, $this->getModifiers());
     }
 
     /**
@@ -80,15 +96,14 @@ trait HasBemClasses
      */
     protected function getModifiers(): array
     {
-        if(! $this->attributes) {
-            return [];
+        if(! $this->attributes || (! $this->attributes->has('modifier') && ! $this->attributes->has('modifiers'))) {
+            return $this->modifiers;
         }
 
-        return array_values(array_filter(array_merge(
-            $this->processClassList($this->attributes->get('modifier', [])),
-            is_array($modifiers = $this->attributes->get('modifiers', []))
-                ? $modifiers
-                : $this->processClassList($modifiers),
+        return $this->modifiers = array_values(array_filter(array_merge(
+            $this->modifiers,
+            $this->pullClassListAttribute('modifier'),
+            $this->pullClassListAttribute('modifiers'),
         )));
     }
 
@@ -97,13 +112,14 @@ trait HasBemClasses
      */
     protected function getClasses(): array
     {
-        if(! $this->attributes) {
-            return [];
+        if(! $this->attributes || ! $this->attributes->has('class')) {
+            return $this->classes;
         }
 
-        return is_array($classes = $this->attributes->get('class', []))
-            ? $classes
-            : $this->processClassList($classes);
+        return $this->classes = array_values(array_filter(array_merge(
+            $this->classes,
+            $this->pullClassListAttribute('class'),
+        )));
     }
 
     /**
@@ -123,12 +139,19 @@ trait HasBemClasses
     }
 
     /**
+     * Generate the full class attribute, containing the BEM "base" and its modifier variants.
+     */
+    public function bem(string $base, string|array $modifiers = []): string
+    {
+        return implode(' ', $this->buildModifierClasses($base, $this->processClassList($modifiers)));
+    }
+
+    /**
      * Get all of the fully qualified classes for this component as an array.
      */
     protected function getAllClasses(string $base): array
     {
         $classes = array_unique(array_filter(array_merge(
-            [$base],
             $this->getModifierClasses($base),
             $this->getClasses(),
         )));
@@ -139,23 +162,24 @@ trait HasBemClasses
     }
 
     /**
-     * Generate the full class attribute, containing the BEM "base", its modifiers and eventual additional classes.
+     * Generate an array of all fully qualified BEM classes for provided base and modifiers.
      */
-    public function bem(string $base): string
+    protected function buildModifierClasses(string $base, array $modifiers): array
     {
-        return implode(' ', $this->getAllClasses($base));
+        return array_values(array_filter(array_merge(
+            [$base],
+            array_map(fn($modifier) => $base.'--'.$modifier, $modifiers),
+        )));
     }
 
     /**
      * Get the component's attribute bag with the merged BEM & additional classes.
      */
-    protected function mergeBemClassesInAttributes(string $base): ComponentAttributeBag
+    protected function mergeBemClassesInAttributes(string $base, string|array $extraModifiers = []): ComponentAttributeBag
     {
-        $this->attributes = $this->attributes ?: $this->newAttributeBag();
+        $this->modifiers($extraModifiers);
 
-        $this->attributes['class'] = $this->bem($base);
-        unset($this->attributes['modifier']);
-        unset($this->attributes['modifiers']);
+        $this->attributes['class'] = implode(' ', $this->getAllClasses($base));
 
         return $this->attributes;
     }
@@ -167,7 +191,7 @@ trait HasBemClasses
     {
         $bag = parent::newAttributeBag($attributes);
 
-        $bag->bemResolver = fn(string $base) => $this->mergeBemClassesInAttributes($base);
+        $bag->bemResolver = fn(string $base, string|array $extraModifiers = []) => $this->mergeBemClassesInAttributes($base, $extraModifiers);
 
         return $bag;
     }
