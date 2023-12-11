@@ -16,7 +16,7 @@ trait HasBemClasses
         $defined = $this->attributes->get('modifiers', []);
 
         $this->attributes['modifiers'] = array_merge(
-            $this->processClassList($defined),
+            is_array($defined) ? $defined : $this->processClassList($defined),
             $this->processClassList($modifiers),
         );
 
@@ -41,7 +41,7 @@ trait HasBemClasses
         $defined = $this->attributes->get('class', []);
 
         $this->attributes['class'] = array_merge(
-            $this->processClassList($defined),
+            is_array($defined) ? $defined : $this->processClassList($defined),
             $this->processClassList($classes),
         );
 
@@ -80,9 +80,15 @@ trait HasBemClasses
      */
     protected function getModifiers(): array
     {
+        if(! $this->attributes) {
+            return [];
+        }
+
         return array_values(array_filter(array_merge(
-            ($this->attributes ? $this->processClassList($this->attributes->get('modifier') ?: []) : null) ?: [],
-            ($this->attributes ? $this->processClassList($this->attributes->get('modifiers') ?: []) : null) ?: [],
+            $this->processClassList($this->attributes->get('modifier', [])),
+            is_array($modifiers = $this->attributes->get('modifiers', []))
+                ? $modifiers
+                : $this->processClassList($modifiers),
         )));
     }
 
@@ -91,9 +97,13 @@ trait HasBemClasses
      */
     protected function getClasses(): array
     {
-        return array_values(array_filter(
-            ($this->attributes ? $this->processClassList($this->attributes->get('class') ?: []) : null) ?: []
-        ));
+        if(! $this->attributes) {
+            return [];
+        }
+
+        return is_array($classes = $this->attributes->get('class', []))
+            ? $classes
+            : $this->processClassList($classes);
     }
 
     /**
