@@ -94,6 +94,8 @@ Get compiled BEM classes with modifiers. The modifiers parameter can either be a
 For example, calling:
 ```php
 $bem('btn__label', 'blue bold')
+// OR
+$bem('btn__label', ['blue','bold'])
 ```
 will result in:
 ```
@@ -106,11 +108,43 @@ btn__label btn__label--blue btn__label--bold
 
 Checks if the specified modifier is applied on this component.
 
+> Warning: this method is also available inside the `Component` instance (using `$this->hasModifier(string $modifier)`) but unfortunately it is not able to check for modifiers defined as attributes on the component's tag (`<x-component modifiers="foo bar" />`) as of Laravel 10.x, because these values are not exposed before rendering the component's view. Let's hope this restriction will be lifted in the future.
+
+If you need to access these modifiers inside the `Component` instance, you can always request them from the component's `__construct` parameters and inject them manually:
+
+```php
+public function __construct(null|string|array $modifiers = [])
+{
+    $this->modifiers($modifiers);
+
+    // Now this will work:
+    if($this->hasModifier('big')) {
+        // ...
+    }
+}
+```
+
 ---
 
 #### `$hasClass(string $classname): bool`
 
 Checks if the specified class is applied on this component.
+
+> Warning: this method is also available inside the `Component` instance (using `$this->hasClass(string $classname)`) but unfortunately it is not able to check for classnames defined as attributes on the component's tag (`<x-component class="foo bar" />`) as of Laravel 10.x, because these values are not exposed before rendering the component's view. Let's hope this restriction will be lifted in the future.
+
+If you need to access these classnames inside the `Component` instance, you can always request them from the component's `__construct` parameters and inject them manually:
+
+```php
+public function __construct(null|string|array $classnames = [])
+{
+    $this->classes($classnames);
+
+    // Now this will work:
+    if($this->hasClass('ajax')) {
+        // ...
+    }
+}
+```
 
 ## 💖 Sponsorships
 
