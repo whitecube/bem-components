@@ -7,17 +7,17 @@ use Illuminate\View\ComponentAttributeBag;
 trait HasBemClasses
 {
     /**
-     * The component's BEM modifiers.
+     * The component's BEM CSS modifiers.
      */
     protected array $modifiers = [];
 
     /**
-     * The component's additional classes.
+     * The component's additional CSS classes.
      */
     protected array $classes = [];
 
     /**
-     * Define the component's modifiers.
+     * Merge multiple additional modifiers into the component's existing modifiers stack.
      */
     public function modifiers(string|array $modifiers): static
     {
@@ -30,7 +30,7 @@ trait HasBemClasses
     }
 
     /**
-     * Add a single component modifier.
+     * Merge a single additional modifier into the component's existing modifiers stack.
      */
     public function modifier(string $modifier): static
     {
@@ -38,7 +38,7 @@ trait HasBemClasses
     }
 
     /**
-     * Define the component's eventual additionnal classes.
+     * Merge multiple additional classnames into the component's existing CSS classes stack.
      */
     public function classes(string|array $classes): static
     {
@@ -51,7 +51,7 @@ trait HasBemClasses
     }
 
     /**
-     * Get and remove eventual existing attributes
+     * Get and remove eventual existing keys defined in the component's attributes bag.
      */
     protected function pullClassListAttribute(string $key): array
     {
@@ -65,7 +65,7 @@ trait HasBemClasses
     }
 
     /**
-     * Transform a class attribute into an usable array of classes.
+     * Transform a list of raw classnames into an usable/cleaned array of CSS classes.
      */
     protected function processClassList(string|array $items): array
     {
@@ -84,7 +84,7 @@ trait HasBemClasses
     }
 
     /**
-     * Get the defined modifiers as an array of fully qualified classes.
+     * Get the defined modifiers as an array of fully qualified BEM CSS classes.
      */
     protected function getModifierClasses(string $base): array
     {
@@ -92,7 +92,7 @@ trait HasBemClasses
     }
 
     /**
-     * Get the defined modifiers as array.
+     * Get all the accessible & defined modifiers as an array.
      */
     protected function getModifiers(): array
     {
@@ -108,7 +108,7 @@ trait HasBemClasses
     }
 
     /**
-     * Get the defined classes as array.
+     * Get the accessible & defined CSS classes as an array.
      */
     protected function getClasses(): array
     {
@@ -123,7 +123,7 @@ trait HasBemClasses
     }
 
     /**
-     * Check if a modifier is defined.
+     * Check if the specified modifier is applied on this component.
      */
     public function hasModifier(string $modifier): bool
     {
@@ -131,7 +131,7 @@ trait HasBemClasses
     }
 
     /**
-     * Check if a class is defined.
+     * Check if the specified CSS class is applied on this component.
      */
     public function hasClass(string $classname): bool
     {
@@ -139,7 +139,7 @@ trait HasBemClasses
     }
 
     /**
-     * Generate the full class attribute, containing the BEM "base" and its modifier variants.
+     * Generate a "class" attribute's value based on a BEM "base" and its eventual modifiers.
      */
     public function bem(string $base, string|array $modifiers = []): string
     {
@@ -147,7 +147,7 @@ trait HasBemClasses
     }
 
     /**
-     * Get all of the fully qualified classes for this component as an array.
+     * Get all of the defined & fully qualified CSS classes for this component as an array.
      */
     protected function getAllClasses(string $base): array
     {
@@ -162,7 +162,7 @@ trait HasBemClasses
     }
 
     /**
-     * Generate an array of all fully qualified BEM classes for provided base and modifiers.
+     * Generate an array fully qualified CSS BEM classes based on the provided base classname and modifiers.
      */
     protected function buildModifierClasses(string $base, array $modifiers): array
     {
@@ -173,9 +173,9 @@ trait HasBemClasses
     }
 
     /**
-     * Get the component's attribute bag with the merged BEM & additional classes.
+     * Apply all the component's defined CSS classes and BEM modifiers into the component's "class" attribute.
      */
-    protected function mergeBemClassesInAttributes(string $base, string|array $extraModifiers = []): ComponentAttributeBag
+    protected function mergeAllClassesInAttributeBag(string $base, string|array $extraModifiers = []): ComponentAttributeBag
     {
         $this->modifiers($extraModifiers);
 
@@ -185,13 +185,13 @@ trait HasBemClasses
     }
 
     /**
-     * Get a new attribute bag instance.
+     * Get a new attribute bag instance with its BEM resolver callback.
      */
     protected function newAttributeBag(array $attributes = [])
     {
         $bag = parent::newAttributeBag($attributes);
 
-        $bag->bemResolver = fn(string $base, string|array $extraModifiers = []) => $this->mergeBemClassesInAttributes($base, $extraModifiers);
+        $bag->bemResolver = fn(string $base, string|array $extraModifiers = []) => $this->mergeAllClassesInAttributeBag($base, $extraModifiers);
 
         return $bag;
     }
