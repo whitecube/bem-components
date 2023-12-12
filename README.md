@@ -1,7 +1,6 @@
-# BEM View Components for Laravel
+# Easy BEM CSS classes for Laravel Components
 
-This package introduces a `BemComponent` class that you can use instead of the regular `Component`, which gives you a few helper methods to aid you with your bem-style workflow.
-
+This package introduces a `HasBemClasses` trait that you can use in Laravel's `App\View\Components` instances, providing a few useful helper methods and automations for a seamless BEM-style integration in your workflow.
 
 ## Installation
 
@@ -13,99 +12,139 @@ composer require whitecube/bem-components
 
 ## Usage
 
+Generate your component files as you are used to, then add the `Whitecube\BemComponents\HasBemClasses` trait to their controller class in `App\View\Components`:
+
 ```php
 <?php
 
 namespace App\View\Components;
 
-use Whitecube\BemComponents\BemComponent;
+use Illuminate\View\Component;
+use Whitecube\BemComponents\HasBemClasses;
 
-class Btn extends BemComponent
+class Btn extends Component
 {
-    public $href;
-    public $icon;
+    use HasBemClasses;
 
-    /**
-     * Create a new component instance.
-     *
-     * @return void
-     */
-    public function __construct($href, $icon = null)
+    public ?string $icon;
+
+    public function __construct(?string $icon = null)
     {
-        $this->href = $href;
         $this->icon = $icon;
+
+        if($this->icon) {
+            $this->modifier('icon');
+        }
     }
 
-    /**
-     * Get the view / contents that represent the component.
-     *
-     * @return \Illuminate\View\View|string
-     */
     public function render()
     {
         return view('components.btn');
     }
-
 }
-
 ```
 
+Then, don't forget to echo `$attributes->bem(string $base, string|array $extraModifiers = [])` inside your component's view:
+
 ```blade
-<a href="{{ $href }}" class="{{ $bem('btn') }}">
+<a {{ $attributes->bem('btn') }}>
     @if($hasModifier('icon'))
         <span class="btn__icon" data-icon="{{ $icon }}"></span>
     @endif
-    
-    {{ $slot }}
+    <span class="btn__label">{{ $slot }}</span>
 </a>
-
 ```
 
-Now you can pass modifiers as you please
-```blade
-<x-btn href="#" modifiers="error">Error</x-btn>
-will result in 
-<a href="#" class="btn btn--error">Error</a>
+Now you can pass modifiers and classes as you please:
 
-<x-btn href="#" modifiers="primary icon" icon="calendar">Calendar</x-btn>
-will result in 
-<a href="#" class="btn btn--primary btn--icon">
-    <span class="btn__icon" data-icon="calendar"></span>
-    Calendar
+```blade
+<x-btn href="#" modifier="big">Click me!</x-btn>
+<x-btn href="#" modifier="big" :modifiers="['foo','bar',null]">Click me!</x-btn>
+<x-btn href="#" icon="eye">Click me!</x-btn>
+<x-btn href="#" icon="eye" modifier="big">Click me!</x-btn>
+<x-btn href="#" icon="eye" modifier="big" class="ajax">Click me!</x-btn>
+```
+```html
+<a href="#" class="btn btn--big">
+    <span class="btn__label">Click me!</span>
+</a>
+<a href="#" class="btn btn--bar btn--big btn--foo">
+    <span class="btn__label">Click me!</span>
+</a>
+<a href="#" class="btn btn--icon">
+    <span class="btn__icon" data-icon="eye"></span>
+    <span class="btn__label">Click me!</span>
+</a>
+<a href="#" class="btn btn--big btn--icon">
+    <span class="btn__icon" data-icon="eye"></span>
+    <span class="btn__label">Click me!</span>
+</a>
+<a href="#" class="ajax btn btn--big btn--icon">
+    <span class="btn__icon" data-icon="eye"></span>
+    <span class="btn__label">Click me!</span>
 </a>
 ```
 
 ## Available methods
 
-#### `$bem($base): string`  
-Get the compiled bem classes with modifiers. The modifiers are specified using the `modifiers` prop on your component, which accepts either a string of space-separated modifiers, or an array.
+#### `$bem(string $base, string|array $modifiers = []): string`
 
-For example, calling `$bem('btn')` on these:
+Get compiled BEM classes with modifiers. The modifiers parameter can either be a string of space-separated modifiers, or an array.
 
-```blade
-<x-btn modifiers="primary error" />
-<x-btn :modifiers="['primary', 'error']" />
+For example, calling:
+```php
+$bem('btn__label', 'blue bold')
+// OR
+$bem('btn__label', ['blue','bold'])
 ```
-
-Will output `btn btn--primary btn--error`
-
-Any additional classes are also kept:
-
-```blade
-<x-btn modifiers="primary error" class="header__btn" />
+will result in:
 ```
-
-Will output `header__btn btn btn--primary btn--error`
+btn__label btn__label--blue btn__label--bold
+```
 
 ---
 
-#### `$hasModifier($modifier): bool`
+#### `$hasModifier(string $modifier): bool`
+
 Checks if the specified modifier is applied on this component.
 
+> Warning: this method is also available inside the `Component` instance (using `$this->hasModifier(string $modifier)`) but unfortunately it is not able to check for modifiers defined as attributes on the component's tag (`<x-component modifiers="foo bar" />`) as of Laravel 10.x, because these values are not exposed before rendering the component's view. Let's hope this restriction will be lifted in the future.
+
+If you need to access these modifiers inside the `Component` instance, you can always request them from the component's `__construct` parameters and inject them manually:
+
+```php
+public function __construct(null|string|array $modifiers = [])
+{
+    $this->modifiers($modifiers);
+
+    // Now this will work:
+    if($this->hasModifier('big')) {
+        // ...
+    }
+}
+```
+
 ---
 
-#### `$hasClass($class): bool`
+#### `$hasClass(string $classname): bool`
+
 Checks if the specified class is applied on this component.
+
+> Warning: this method is also available inside the `Component` instance (using `$this->hasClass(string $classname)`) but unfortunately it is not able to check for classnames defined as attributes on the component's tag (`<x-component class="foo bar" />`) as of Laravel 10.x, because these values are not exposed before rendering the component's view. Let's hope this restriction will be lifted in the future.
+
+If you need to access these classnames inside the `Component` instance, you can always request them from the component's `__construct` parameters and inject them manually:
+
+```php
+public function __construct(null|string|array $classnames = [])
+{
+    $this->classes($classnames);
+
+    // Now this will work:
+    if($this->hasClass('ajax')) {
+        // ...
+    }
+}
+```
 
 ## 💖 Sponsorships
 
