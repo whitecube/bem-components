@@ -12,7 +12,7 @@ composer require whitecube/bem-components
 
 ## Usage
 
-Generate your component files as you are used to, then add the `Whitecube\BemComponents\HasBemClasses` trait to their controller class in `App\View\Components`:
+Generate your component files as you are used to, then add the `Whitecube\BemComponents\HasBemClasses` trait to the component's view controller in `App\View\Components`:
 
 ```php
 <?php
@@ -55,7 +55,7 @@ Then, don't forget to echo `$attributes->bem(string $base, string|array $extraMo
 </a>
 ```
 
-Now you can pass modifiers and classes as you please:
+You can now pass modifiers and classes as you please:
 
 ```blade
 <x-btn href="#" modifier="big">Click me!</x-btn>
@@ -89,7 +89,7 @@ Now you can pass modifiers and classes as you please:
 
 #### `$bem(string $base, string|array $modifiers = []): string`
 
-Get compiled BEM classes with modifiers. The modifiers parameter can either be a string of space-separated modifiers, or an array.
+Get compiled BEM classes with modifiers. The `modifiers` parameter can either be a string of space-separated modifiers or an array.
 
 For example, calling:
 ```php
@@ -106,9 +106,10 @@ btn__label btn__label--blue btn__label--bold
 
 #### `$hasModifier(string $modifier): bool`
 
-Checks if the specified modifier is applied on this component.
+Checks if the specified `modifier` is applied on this component.
 
-> Warning: this method is also available inside the `Component` instance (using `$this->hasModifier(string $modifier)`) but unfortunately it is not able to check for modifiers defined as attributes on the component's tag (`<x-component modifiers="foo bar" />`) as of Laravel 10.x, because these values are not exposed before rendering the component's view. Let's hope this restriction will be lifted in the future.
+> [!IMPORTANT]
+> This method is also available inside the `Component` instance (using `$this->hasModifier(string $modifier)`) but unfortunately it is not able to check for modifiers defined as attributes on the component's tag (`<x-component modifiers="foo bar" />`) as of Laravel 10.x, because these values are not exposed before rendering the component's view. Let's hope this restriction will be lifted in the future.
 
 If you need to access these modifiers inside the `Component` instance, you can always request them from the component's `__construct` parameters and inject them manually:
 
@@ -128,9 +129,10 @@ public function __construct(null|string|array $modifiers = [])
 
 #### `$hasClass(string $classname): bool`
 
-Checks if the specified class is applied on this component.
+Checks if the specified CSS classname is applied on this component.
 
-> Warning: this method is also available inside the `Component` instance (using `$this->hasClass(string $classname)`) but unfortunately it is not able to check for classnames defined as attributes on the component's tag (`<x-component class="foo bar" />`) as of Laravel 10.x, because these values are not exposed before rendering the component's view. Let's hope this restriction will be lifted in the future.
+> [!IMPORTANT]
+> This method is also available inside the `Component` instance (using `$this->hasClass(string $classname)`) but unfortunately it is not able to check for classnames defined as attributes on the component's tag (`<x-component class="foo bar" />`) as of Laravel 10.x, because these values are not exposed before rendering the component's view. Let's hope this restriction will be lifted in the future.
 
 If you need to access these classnames inside the `Component` instance, you can always request them from the component's `__construct` parameters and inject them manually:
 
