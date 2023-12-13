@@ -189,10 +189,9 @@ trait HasBemClasses
      */
     protected function newAttributeBag(array $attributes = [])
     {
-        $bag = parent::newAttributeBag($attributes);
-
-        $bag->bemResolver = fn(string $base, string|array $extraModifiers = []) => $this->mergeAllClassesInAttributeBag($base, $extraModifiers);
-
-        return $bag;
+        return (new BemComponentAttributeBag($attributes))
+            ->setBemResolver(function(string $base, string|array $extraModifiers = []) {
+                return $this->mergeAllClassesInAttributeBag($base, $extraModifiers);
+            });
     }
 }

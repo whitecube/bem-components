@@ -14,7 +14,12 @@ class BemClassesServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        ComponentAttributeBag::macro('bem', fn(string $base, string|array $extraModifiers = []) => call_user_func($this->bemResolver, $base, $extraModifiers));
+        ComponentAttributeBag::macro(
+            'bem',
+            function(string $base, string|array $extraModifiers = []) {
+                return $this->resolveBemClasses($base, $extraModifiers);
+            }
+        );
     }
 
     /**
